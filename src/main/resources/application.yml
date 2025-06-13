@@ -6,3 +6,11 @@ spring:
     name: ${SPRING_APPLICATION_NAME}
   config:
     import: optional:configserver:http://${CONFIG_SERVICE}:${PORT_CONFIG}
+  mail:
+    host: localhost          # servidor SMTP de desarrollo o MailHog
+    port: 1025               # puerto por defecto de MailHog/MailDev
+    username: test
+    password: test
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false

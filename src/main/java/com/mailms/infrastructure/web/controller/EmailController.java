@@ -2,6 +2,7 @@ package com.mailms.infrastructure.web.controller;
 
 import com.mailms.domain.model.Email;
 import com.mailms.domain.port.in.SubscribeToWaitlistUseCase;
+import com.mailms.domain.port.in.SendEmailUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.regex.Matcher;
 public class EmailController {
 
     private final SubscribeToWaitlistUseCase subscribeToWaitlistUseCase;
+    private final SendEmailUseCase sendEmailUseCase;
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
@@ -52,6 +54,23 @@ public class EmailController {
         } catch (Exception e) {
             // Para otros errores inesperados
             return ResponseEntity.status(500).body("Error al procesar la solicitud: " + e.getMessage());
+        }
+    }
+    
+    @PostMapping("/send")
+    public ResponseEntity<?> sendEmail(@RequestHeader("to") String to,
+                                       @RequestHeader(value = "subject", required = false) String subject,
+                                       @RequestHeader(value = "body", required = false) String body) {
+        // Validate email address format using existing method
+        if (!isValidEmail(to)) {
+            return ResponseEntity.badRequest().body("El formato del correo electrónico de destino no es válido");
+        }
+
+        try {
+            sendEmailUseCase.send(to, subject, body);
+            return ResponseEntity.ok("Correo enviado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al enviar el correo: " + e.getMessage());
         }
     }
     
